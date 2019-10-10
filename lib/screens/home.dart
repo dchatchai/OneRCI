@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:onerci/screens/my_service.dart';
 import 'package:onerci/screens/my_style.dart';
 import 'package:onerci/screens/register.dart';
 
@@ -11,6 +13,23 @@ class _HomeState extends State<Home> {
 // Explicit ประกาศตัวแปร
 
 // Method
+
+  @override
+  void initState() {
+    super.initState();
+    checkStatus();
+  }
+
+  Future<void> checkStatus() async {
+    FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    FirebaseUser firebaseUser = await firebaseAuth.currentUser();
+    if (firebaseUser != null) {
+      MaterialPageRoute materialPageRoute =
+          MaterialPageRoute(builder: (BuildContext context) => MyService());
+      Navigator.of(context).pushAndRemoveUntil(
+          materialPageRoute, (Route<dynamic> route) => false);
+    }
+  }
 
   Widget signInButton() {
     return RaisedButton(
@@ -29,11 +48,9 @@ class _HomeState extends State<Home> {
       onPressed: () {
         print('You Click Sign Up');
 
-        MaterialPageRoute materialPageRoute = MaterialPageRoute(builder: (BuildContext context) => Register());
+        MaterialPageRoute materialPageRoute =
+            MaterialPageRoute(builder: (BuildContext context) => Register());
         Navigator.of(context).push(materialPageRoute);
-
-
-
       },
     );
   }
@@ -113,7 +130,8 @@ class _HomeState extends State<Home> {
         child: Container(
           decoration: BoxDecoration(
             gradient: RadialGradient(
-              colors: [Colors.white, MyStyle().mainColor],radius: 1.0,
+              colors: [Colors.white, MyStyle().mainColor],
+              radius: 1.0,
             ),
           ),
           child: Center(

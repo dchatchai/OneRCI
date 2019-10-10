@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:onerci/screens/my_service.dart';
 import 'package:onerci/screens/my_style.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -85,7 +86,6 @@ class _RegisterState extends State<Register> {
         .then((response) {
       print('Register Success');
       setUpDisplayName();
-
     }).catchError((response) {
       String title = response.code;
       String message = response.message;
@@ -94,20 +94,19 @@ class _RegisterState extends State<Register> {
     });
   }
 
-  Future<void> setUpDisplayName()async{
+  Future<void> setUpDisplayName() async {
     FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-    await firebaseAuth.currentUser().then((response){
+    await firebaseAuth.currentUser().then((response) {
       UserUpdateInfo userUpdateInfo = UserUpdateInfo();
       userUpdateInfo.displayName = nameString;
       response.updateProfile(userUpdateInfo);
 
-
-
-
-      
+      MaterialPageRoute materialPageRoute =
+          MaterialPageRoute(builder: (BuildContext context) => MyService());
+      Navigator.of(context).pushAndRemoveUntil(
+          materialPageRoute, (Route<dynamic> route) => false);
     });
   }
-
 
   void myAlert(String title, String message) {
     showDialog(
