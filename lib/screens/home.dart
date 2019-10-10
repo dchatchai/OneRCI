@@ -11,6 +11,8 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
 // Explicit ประกาศตัวแปร
+  final formKey = GlobalKey<FormState>();
+  String emailString, passwordString;
 
 // Method
 
@@ -38,8 +40,66 @@ class _HomeState extends State<Home> {
         'Sign In',
         style: TextStyle(color: Colors.white),
       ),
-      onPressed: () {},
+      onPressed: () {
+        formKey.currentState.save();
+        print('email = $emailString, password = $passwordString');
+        checkAuthen();
+      },
     );
+  }
+
+  Future<void> checkAuthen() async {
+    FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    await firebaseAuth
+        .signInWithEmailAndPassword(
+            email: emailString, password: passwordString)
+        .then((response) {
+      MaterialPageRoute materialPageRoute =
+          MaterialPageRoute(builder: (BuildContext context) => MyService());
+      Navigator.of(context).pushAndRemoveUntil(
+          materialPageRoute, (Route<dynamic> route) => false);
+    }).catchError((response) {
+      String title = response.code;
+      String message = response.message;
+      myAlert(title, message);
+    });
+  }
+
+  Widget showTitle(String title) {
+    return ListTile(
+      leading: Icon(
+        Icons.add_alert,
+        size: 48.0,
+        color: Colors.red,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: Colors.red,
+          fontSize: MyStyle().h2,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  void myAlert(String title, String message) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: showTitle(title),
+            content: Text(message),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('OK'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        });
   }
 
   Widget signUpButton() {
@@ -80,6 +140,9 @@ class _HomeState extends State<Home> {
           labelText: 'Password :',
           labelStyle: TextStyle(color: MyStyle().textColor),
         ),
+        onSaved: (value) {
+          passwordString = value.trim();
+        },
       ),
       width: 250.0,
     );
@@ -98,6 +161,9 @@ class _HomeState extends State<Home> {
           labelText: 'User :',
           labelStyle: TextStyle(color: MyStyle().textColor),
         ),
+        onSaved: (value) {
+          emailString = value.trim();
+        },
       ),
       width: 250.0,
     );
@@ -135,18 +201,21 @@ class _HomeState extends State<Home> {
             ),
           ),
           child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                showLogo(),
-                showAppName(),
-                userText(),
-                passwordText(),
-                SizedBox(
-                  height: 8.0,
-                ),
-                showButton(),
-              ],
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  showLogo(),
+                  showAppName(),
+                  userText(),
+                  passwordText(),
+                  SizedBox(
+                    height: 8.0,
+                  ),
+                  showButton(),
+                ],
+              ),
             ),
           ),
         ),
