@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:onerci/screens/add_product.dart';
 import 'package:onerci/screens/home.dart';
+import 'package:onerci/screens/list_all_product.dart';
 import 'package:onerci/screens/my_style.dart';
 
 class MyService extends StatefulWidget {
@@ -10,8 +12,26 @@ class MyService extends StatefulWidget {
 
 class _MyServiceState extends State<MyService> {
 // Exclipit
+  String loginString = '';
+  Widget currentWidget = ListAllProduct();
 
 // Method
+
+  @override
+  void initState() {
+    super.initState();
+    findDisplayName();
+  }
+
+  Future<void> findDisplayName() async {
+    FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+    await firebaseAuth.currentUser().then((response) {
+      setState(() {
+        loginString = response.displayName;
+        print('loginString = $loginString');
+      });
+    });
+  }
 
   Widget myDrawer() {
     return Drawer(
@@ -36,6 +56,12 @@ class _MyServiceState extends State<MyService> {
       ),
       title: Text('List All Products'),
       subtitle: Text('Show All Products in my Factory'),
+      onTap: () {
+        setState(() {
+          currentWidget = ListAllProduct();
+        });
+        Navigator.of(context).pop();
+      },
     );
   }
 
@@ -48,6 +74,12 @@ class _MyServiceState extends State<MyService> {
       ),
       title: Text('Add Product'),
       subtitle: Text('Show Add Product page'),
+      onTap: () {
+        setState(() {
+          currentWidget = AddProduct();
+        });
+        Navigator.of(context).pop();
+      },
     );
   }
 
@@ -87,7 +119,13 @@ class _MyServiceState extends State<MyService> {
   }
 
   Widget showLogin() {
-    return Text('Login by ');
+    return Text(
+      'Login by $loginString',
+      style: TextStyle(
+        color: Colors.purple,
+        fontWeight: FontWeight.bold,
+      ),
+    );
   }
 
   Widget signOutButton() {
@@ -116,7 +154,7 @@ class _MyServiceState extends State<MyService> {
         title: Text('My Service'),
         actions: <Widget>[signOutButton()],
       ),
-      body: Text('body'),
+      body: currentWidget,
       drawer: myDrawer(),
     );
   }
