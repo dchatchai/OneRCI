@@ -149,7 +149,7 @@ class _MyServiceState extends State<MyService> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(resizeToAvoidBottomPadding: false,  //  อนุญาตให้ keyboard ทับวัตถุบนหน้าจอ
       appBar: AppBar(
         title: Text('My Service'),
         actions: <Widget>[signOutButton()],
