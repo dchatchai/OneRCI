@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:onerci/models/product_model.dart';
+import 'package:onerci/screens/detail.dart';
 import 'package:onerci/screens/my_style.dart';
+import 'package:barcode_scan/barcode_scan.dart';
 
 class ListAllProduct extends StatefulWidget {
   @override
@@ -11,6 +13,7 @@ class ListAllProduct extends StatefulWidget {
 class _ListAllProductState extends State<ListAllProduct> {
 // Explicit
   List<ProductModel> productModels = []; // สร้างตัวแปร array
+  String qrCode;
 
 // Method
   @override
@@ -60,7 +63,7 @@ class _ListAllProductState extends State<ListAllProduct> {
 
   Widget showName(int index) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,  // ชิดซ้าย ถ้าชิดขวาให้ .end
+      mainAxisAlignment: MainAxisAlignment.start, // ชิดซ้าย ถ้าชิดขวาให้ .end
       children: <Widget>[
         Text(
           productModels[index].name,
@@ -83,18 +86,72 @@ class _ListAllProductState extends State<ListAllProduct> {
     return Text(detail);
   }
 
+  Widget qrCodeButton() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: <Widget>[
+            Container(
+              margin: EdgeInsets.only(bottom: 20.0, right: 20.0),
+              child: FloatingActionButton(
+                child: Icon(Icons.list),
+                onPressed: () {
+                  readQRcode();
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Future<void> readQRcode() async {
+    try {
+      qrCode = await BarcodeScanner.scan();
+      print('qrCode = $qrCode');
+      for (var productModel in productModels) {
+        if (qrCode == productModel.qrCode) {
+          MaterialPageRoute materialPageRoute = MaterialPageRoute(
+              builder: (BuildContext context) => Detail(
+                    productModel: productModel,
+                  ));
+          Navigator.of(context).push(materialPageRoute);
+        } else {
+          print('No $qrCode in my Database');
+        }
+      }
+    } catch (e) {}
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: productModels.length,
-      itemBuilder: (BuildContext context, int index) {
-        return Row(
-          children: <Widget>[
-            showImage(index),
-            showText(index),
-          ],
-        );
-      },
+    return Stack(
+      children: <Widget>[
+        ListView.builder(
+          itemCount: productModels.length,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              child: Row(
+                children: <Widget>[
+                  showImage(index),
+                  showText(index),
+                ],
+              ),
+              onTap: () {
+                MaterialPageRoute materialPageRoute = MaterialPageRoute(
+                    builder: (BuildContext context) => Detail(
+                          productModel: productModels[index],
+                        ));
+                Navigator.of(context).push(materialPageRoute);
+              },
+            );
+          },
+        ),
+        qrCodeButton(),
+      ],
     );
   }
 }
